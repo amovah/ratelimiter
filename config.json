@@ -1,0 +1,5 @@
+{
+  "requestPerDuration": 10,
+  "duration": 1000,
+  "targetServer": "localhost:8020"
+}

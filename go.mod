@@ -1,3 +1,3 @@
-module github.com/amovah/ratelimiter
+module ratelimiter
 
 go 1.12
