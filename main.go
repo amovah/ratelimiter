@@ -4,19 +4,21 @@ import (
   // "bytes"
 	"fmt"
   // "io"
-  // "encoding/json"
+  "encoding/json"
   "net/http"
   "strings"
   // "bufio"
   "io/ioutil"
 )
 
-// type Shit struct {
-//   Name string
-// }
+type Config struct {
+	RequestPerDuration uint
+	Duration uint
+	TargetServer string
+}
 
 func proxy(res http.ResponseWriter, req *http.Request) {
-  req.URL.Path = "http://localhost:8010" + req.URL.Path
+  req.URL.Path = config.TargetServer + req.URL.Path
 
   if req.Method == "GET" {
     response, err := http.Get(req.URL.Path)
@@ -24,7 +26,6 @@ func proxy(res http.ResponseWriter, req *http.Request) {
     if err != nil {
       fmt.Fprint(res, "ERROR")
     } else {
-
       body, err := ioutil.ReadAll(response.Body)
       if err != nil {
         fmt.Fprint(res, "ERROR")
@@ -39,7 +40,17 @@ func proxy(res http.ResponseWriter, req *http.Request) {
   }
 }
 
+var config Config
+
 func main() {
+	// read config file
+	data, err := ioutil.ReadFile("./config.json")
+	if err != nil {
+		panic("Config file is not found")
+	}
+
+	json.Unmarshal(data, &config)
+
   http.HandleFunc("/", proxy)
 
   http.ListenAndServe(":8080", nil)
