@@ -16,12 +16,12 @@ type Config struct {
 }
 
 func proxy(res http.ResponseWriter, req *http.Request) {
-	if requestCount <= config.RequestPerDuration {
-		requestCount = requestCount + 1
+	if record[req.RemoteAddr] <= uint64(config.RequestPerDuration) {
+		record[req.RemoteAddr] = record[req.RemoteAddr] + 1
 
 		go func() {
 			time.Sleep(time.Duration(config.Duration) * time.Millisecond)
-			requestCount = requestCount - 1
+			record[req.RemoteAddr] = record[req.RemoteAddr] - 1
 		}()
 
 		req.URL.Path = config.TargetServer + req.URL.Path
@@ -50,7 +50,7 @@ func proxy(res http.ResponseWriter, req *http.Request) {
 }
 
 var config Config
-var requestCount uint
+var record map[string]uint64
 
 func main() {
 	// read config file
@@ -61,7 +61,7 @@ func main() {
 
 	json.Unmarshal(data, &config)
 
-	requestCount = 0
+	record = make(map[string]uint64)
 
   http.HandleFunc("/", proxy)
 
