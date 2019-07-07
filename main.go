@@ -1,14 +1,12 @@
 package main
 
 import (
-  // "bytes"
 	"fmt"
-  // "io"
   "encoding/json"
   "net/http"
   "strings"
-  // "bufio"
   "io/ioutil"
+	"time"
 )
 
 type Config struct {
@@ -18,29 +16,41 @@ type Config struct {
 }
 
 func proxy(res http.ResponseWriter, req *http.Request) {
-  req.URL.Path = config.TargetServer + req.URL.Path
+	if requestCount <= config.RequestPerDuration {
+		requestCount = requestCount + 1
 
-  if req.Method == "GET" {
-    response, err := http.Get(req.URL.Path)
+		go func() {
+			time.Sleep(time.Duration(config.Duration) * time.Millisecond)
+			requestCount = requestCount - 1
+		}()
 
-    if err != nil {
-      fmt.Fprint(res, "ERROR")
-    } else {
-      body, err := ioutil.ReadAll(response.Body)
-      if err != nil {
-        fmt.Fprint(res, "ERROR")
-      } else {
-        for key, value := range response.Header {
-          res.Header().Set(key, strings.Join(value, ", "))
-        }
+		req.URL.Path = config.TargetServer + req.URL.Path
 
-        res.Write(body)
-      }
-    }
-  }
+		if req.Method == "GET" {
+	    response, err := http.Get(req.URL.Path)
+
+	    if err != nil {
+	      fmt.Fprint(res, "ERROR")
+	    } else {
+	      body, err := ioutil.ReadAll(response.Body)
+	      if err != nil {
+	        fmt.Fprint(res, "ERROR")
+	      } else {
+	        for key, value := range response.Header {
+	          res.Header().Set(key, strings.Join(value, ", "))
+	        }
+
+	        res.Write(body)
+	      }
+	    }
+	  }
+	} else {
+		http.Error(res, "You reach your limit", 429)
+	}
 }
 
 var config Config
+var requestCount uint
 
 func main() {
 	// read config file
@@ -50,6 +60,8 @@ func main() {
 	}
 
 	json.Unmarshal(data, &config)
+
+	requestCount = 0
 
   http.HandleFunc("/", proxy)
 
