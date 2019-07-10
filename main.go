@@ -15,6 +15,19 @@ type Config struct {
 	TargetServer string
 }
 
+func ProxyResponse(origin http.Response, target http.ResponseWriter) {
+	body, err := ioutil.ReadAll(origin.Body)
+	if err != nil {
+		fmt.Fprint(target, "ERROR")
+	} else {
+		for key, value := range origin.Header {
+			target.Header().Set(key, strings.Join(value, ", "))
+		}
+
+		target.Write(body)
+	}
+}
+
 func proxy(res http.ResponseWriter, req *http.Request) {
 	if record[req.RemoteAddr] <= uint64(config.RequestPerDuration) {
 		record[req.RemoteAddr] = record[req.RemoteAddr] + 1
@@ -32,16 +45,7 @@ func proxy(res http.ResponseWriter, req *http.Request) {
 	    if err != nil {
 	      fmt.Fprint(res, "ERROR")
 	    } else {
-	      body, err := ioutil.ReadAll(response.Body)
-	      if err != nil {
-	        fmt.Fprint(res, "ERROR")
-	      } else {
-	        for key, value := range response.Header {
-	          res.Header().Set(key, strings.Join(value, ", "))
-	        }
-
-	        res.Write(body)
-	      }
+				ProxyResponse(*response, res)
 	    }
 	  }
 	} else {
