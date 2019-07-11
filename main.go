@@ -48,6 +48,16 @@ func proxy(res http.ResponseWriter, req *http.Request) {
 				ProxyResponse(*response, res)
 	    }
 	  }
+
+		if req.Method == "POST" {
+			response, err := http.Post(req.URL.Path, req.Header.Get("Content-Type"), req.Body)
+
+	    if err != nil {
+	      fmt.Fprint(res, err)
+	    } else {
+				ProxyResponse(*response, res)
+	    }
+		}
 	} else {
 		http.Error(res, "You reach your limit", 429)
 	}
