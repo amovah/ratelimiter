@@ -61,10 +61,8 @@ func proxy(res http.ResponseWriter, req *http.Request) {
 	    }
 
 			ProxyResponse(*response, res)
-		}
-
-		if req.Method == "PUT" {
-			createdReq, err := http.NewRequest("PUT", req.URL.Path, req.Body)
+		} else {
+			createdReq, err := http.NewRequest(req.Method, req.URL.Path, req.Body)
 			if err != nil {
 				res.WriteHeader(400)
 				fmt.Fprint(res, err)
