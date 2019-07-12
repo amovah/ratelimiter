@@ -1,21 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+	"os"
+	"strconv"
 )
 
-type Config struct {
-	RequestPerDuration uint
-	Duration uint
-	TargetServer string
-}
-
-func ProxyResponse(origin http.Response, target http.ResponseWriter) {
+func proxyResponse(origin http.Response, target http.ResponseWriter) {
 	body, err := ioutil.ReadAll(origin.Body)
 	if err != nil {
 		fmt.Fprint(target, err)
@@ -30,20 +25,22 @@ func ProxyResponse(origin http.Response, target http.ResponseWriter) {
 	target.Write(body)
 }
 
-func ProxyRequest(res http.ResponseWriter, req *http.Request) {
-	if record[req.RemoteAddr] > uint64(config.RequestPerDuration) {
+func proxyRequest(res http.ResponseWriter, req *http.Request) {
+	if record[req.RemoteAddr] > maxRatePerIP || totalRequest > totalMaxRate {
 		http.Error(res, "You reach your limit", 429)
 		return
 	}
 
 	record[req.RemoteAddr] = record[req.RemoteAddr] + 1
+	totalRequest = totalRequest + 1
 
 	go func() {
-		time.Sleep(time.Duration(config.Duration) * time.Millisecond)
+		time.Sleep(time.Second)
 		record[req.RemoteAddr] = record[req.RemoteAddr] - 1
+		totalRequest = totalRequest - 1
 	}()
 
-	req.URL.Path = config.TargetServer + req.URL.Path
+	req.URL.Path = targetServer + req.URL.Path
 
 	createdReq, err := http.NewRequest(req.Method, req.URL.Path, req.Body)
 	if err != nil {
@@ -60,24 +57,42 @@ func ProxyRequest(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ProxyResponse(*response, res)
+	proxyResponse(*response, res)
 }
 
-var config Config
 var record map[string]uint64
+var totalRequest uint64
+var maxRatePerIP uint64
+var totalMaxRate uint64
+var targetServer string
 
 func main() {
-	// read config file
-	data, err := ioutil.ReadFile("./config.json")
+	record = make(map[string]uint64)
+	totalRequest = 0
+	var err error
+
+	maxRatePerIP, err = strconv.ParseUint(os.Getenv("MAX_RATE_PER_IP"), 10, 64)
 	if err != nil {
-		panic("Config file is not found")
+		maxRatePerIP = 100
 	}
 
-	json.Unmarshal(data, &config)
+	totalMaxRate, err = strconv.ParseUint(os.Getenv("TOTAL_MAX_RATE"), 10, 64)
+	if err != nil {
+		totalMaxRate = 10000
+	}
 
-	record = make(map[string]uint64)
+	targetServer = os.Getenv("TARGET_SERVER")
+	if targetServer == "" {
+		fmt.Println("TARGET_SERVER environment variable cannot be empty")
+		return
+	}
 
-	http.HandleFunc("/", ProxyRequest)
+	http.HandleFunc("/", proxyRequest)
 
-	http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	http.ListenAndServe(":" + port, nil)
 }
