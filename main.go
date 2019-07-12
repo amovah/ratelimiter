@@ -18,7 +18,7 @@ type Config struct {
 func ProxyResponse(origin http.Response, target http.ResponseWriter) {
 	body, err := ioutil.ReadAll(origin.Body)
 	if err != nil {
-		fmt.Fprint(target, "ERROR")
+		fmt.Fprint(target, err)
 		return
 	}
 
@@ -26,10 +26,11 @@ func ProxyResponse(origin http.Response, target http.ResponseWriter) {
 		target.Header().Set(key, strings.Join(value, ", "))
 	}
 
+	target.WriteHeader(origin.StatusCode)
 	target.Write(body)
 }
 
-func proxy(res http.ResponseWriter, req *http.Request) {
+func ProxyRequest(res http.ResponseWriter, req *http.Request) {
 	if record[req.RemoteAddr] > uint64(config.RequestPerDuration) {
 		http.Error(res, "You reach your limit", 429)
 		return
@@ -76,7 +77,7 @@ func main() {
 
 	record = make(map[string]uint64)
 
-	http.HandleFunc("/", proxy)
+	http.HandleFunc("/", ProxyRequest)
 
 	http.ListenAndServe(":8080", nil)
 }
