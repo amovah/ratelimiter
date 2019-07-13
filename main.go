@@ -40,8 +40,6 @@ func proxyRequest(res http.ResponseWriter, req *http.Request) {
 		totalRequest = totalRequest - 1
 	}()
 
-	req.URL.Path = targetServer + req.URL.Path
-
 	createdReq, err := http.NewRequest(req.Method, req.URL.Path, req.Body)
 	if err != nil {
 		res.WriteHeader(400)

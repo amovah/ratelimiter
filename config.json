@@ -1,5 +1,0 @@
-{
-  "requestPerDuration": 10,
-  "duration": 1000,
-  "targetServer": "http://localhost:8010"
-}
