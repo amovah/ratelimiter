@@ -11,6 +11,8 @@ import (
 )
 
 func proxyResponse(origin http.Response, target http.ResponseWriter) {
+	defer origin.Body.Close()
+
 	body, err := ioutil.ReadAll(origin.Body)
 	if err != nil {
 		fmt.Fprint(target, err)
@@ -39,6 +41,8 @@ func proxyRequest(res http.ResponseWriter, req *http.Request) {
 		record[req.RemoteAddr] = record[req.RemoteAddr] - 1
 		totalRequest = totalRequest - 1
 	}()
+
+	defer req.Body.Close()
 
 	createdReq, err := http.NewRequest(req.Method, req.URL.Path, req.Body)
 	if err != nil {
