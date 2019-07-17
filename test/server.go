@@ -11,5 +11,5 @@ func main() {
 		port = "8081"
 	}
 
-	http.ListenAndServe(":" + port, nil)
+	http.ListenAndServe(":"+port, nil)
 }

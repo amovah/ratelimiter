@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
-	"time"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 func proxyResponse(origin http.Response, target http.ResponseWriter) {
@@ -96,5 +96,5 @@ func main() {
 
 	http.HandleFunc("/", proxyRequest)
 
-	http.ListenAndServe(":" + port, nil)
+	http.ListenAndServe(":"+port, nil)
 }
