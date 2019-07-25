@@ -28,6 +28,8 @@ func proxyResponse(origin http.Response, target http.ResponseWriter) {
 }
 
 func proxyRequest(res http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+
 	if record[req.RemoteAddr] > maxRatePerIP || totalRequest > totalMaxRate {
 		http.Error(res, "You reach your limit", 429)
 		return
@@ -42,9 +44,7 @@ func proxyRequest(res http.ResponseWriter, req *http.Request) {
 		totalRequest = totalRequest - 1
 	}()
 
-	defer req.Body.Close()
-
-	createdReq, err := http.NewRequest(req.Method, req.URL.Path, req.Body)
+	createdReq, err := http.NewRequest(req.Method, targetServer+req.URL.Path, req.Body)
 	if err != nil {
 		res.WriteHeader(400)
 		fmt.Fprint(res, err)
