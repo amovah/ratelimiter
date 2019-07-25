@@ -29,18 +29,19 @@ func proxyResponse(origin http.Response, target http.ResponseWriter) {
 
 func proxyRequest(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
+	ip := strings.Split(req.RemoteAddr, ":")[0]
 
-	if record[req.RemoteAddr] > maxRatePerIP || totalRequest > totalMaxRate {
+	if record[ip] > maxRatePerIP || totalRequest > totalMaxRate {
 		http.Error(res, "You reach your limit", 429)
 		return
 	}
 
-	record[req.RemoteAddr] = record[req.RemoteAddr] + 1
+	record[ip] = record[ip] + 1
 	totalRequest = totalRequest + 1
 
 	go func() {
 		time.Sleep(time.Second)
-		record[req.RemoteAddr] = record[req.RemoteAddr] - 1
+		record[ip] = record[ip] - 1
 		totalRequest = totalRequest - 1
 	}()
 
