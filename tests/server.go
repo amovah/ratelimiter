@@ -1,6 +1,4 @@
-// +build integration
-
-package test
+package tests
 
 import (
 	"encoding/json"
@@ -66,7 +64,7 @@ func deleteTest(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func main() {
+func Server() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8081"

@@ -1,4 +1,4 @@
-package test
+package tests
 
 import (
 	"os"
@@ -13,7 +13,7 @@ type Config struct {
 
 var config Config
 
-func Load() Config {
+func LoadConfig() Config {
 	if config.ProxyServerPath != "" {
 		return config
 	}
@@ -21,7 +21,7 @@ func Load() Config {
 	config = Config{}
 
 	proxyServerPath := os.Getenv("PROXY_SERVER_PATH")
-	if proxyServerPath != "" {
+	if proxyServerPath == "" {
 		proxyServerPath = "http://localhost:8080"
 	}
 
