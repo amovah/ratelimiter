@@ -157,3 +157,27 @@ func TestProxyPut(t *testing.T) {
 
 	assert.Equal(t, "403 Forbidden", string(body), "body is not proxied")
 }
+
+func TestProxyDelete(t *testing.T) {
+	go Server()
+
+	config := LoadConfig()
+	client := http.Client{}
+	request, _ := http.NewRequest("DELETE", config.ProxyServerPath+"/delete", nil)
+
+	res, err := client.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer res.Body.Close()
+
+	assert.Equal(t, 404, res.StatusCode, "status code is not proxied")
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "404 Model Not Found", string(body), "body is not proxied")
+}
