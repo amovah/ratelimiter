@@ -29,6 +29,7 @@ func proxyResponse(origin http.Response, target http.ResponseWriter) {
 }
 
 func proxyRequest(res http.ResponseWriter, req *http.Request) {
+	mutex.Lock()
 	defer req.Body.Close()
 	ip := strings.Split(req.RemoteAddr, ":")[0]
 
@@ -37,7 +38,6 @@ func proxyRequest(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	mutex.Lock()
 	record[ip] = record[ip] + 1
 	totalRequest = totalRequest + 1
 	mutex.Unlock()

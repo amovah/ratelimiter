@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"io/ioutil"
 	"net/http"
 	"sync"
 	"testing"
@@ -26,6 +27,7 @@ func TestRateLimiting(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			ioutil.ReadAll(res.Body)
 			res.Body.Close()
 		}()
 	}
