@@ -133,3 +133,27 @@ func TestProxyBody(t *testing.T) {
 	assert.Equal(t, "123", parsed.Password, "body is not proxied")
 	assert.Equal(t, "ali_movahedi@aol.com", parsed.Email, "body is not proxied")
 }
+
+func TestProxyPut(t *testing.T) {
+	go Server()
+
+	config := LoadConfig()
+	client := http.Client{}
+	request, _ := http.NewRequest("PUT", config.ProxyServerPath+"/put", nil)
+
+	res, err := client.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer res.Body.Close()
+
+	assert.Equal(t, 403, res.StatusCode, "status code is not proxied")
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "403 Forbidden", string(body), "body is not proxied")
+}
