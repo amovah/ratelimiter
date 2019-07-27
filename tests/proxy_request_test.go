@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -87,4 +89,47 @@ func TestProxyStatusCode(t *testing.T) {
 	}
 
 	assert.Equal(t, "400 very bad request", string(body), "body is not proxied")
+}
+
+func TestProxyBody(t *testing.T) {
+	go Server()
+
+	data, err := json.Marshal(PostedData{
+		Username: "Ali",
+		Password: "123",
+		Email:    "ali_movahedi@aol.com",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	config := LoadConfig()
+	client := http.Client{}
+	request, err := http.NewRequest("POST", config.ProxyServerPath+"/post", bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := client.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+
+	assert.Equal(t, 200, res.StatusCode, "status code is not proxied")
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parsed := PostedData{}
+	err = json.Unmarshal(body, &parsed)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "Alimodified", parsed.Username, "body is not proxied")
+	assert.Equal(t, "123", parsed.Password, "body is not proxied")
+	assert.Equal(t, "ali_movahedi@aol.com", parsed.Email, "body is not proxied")
 }
