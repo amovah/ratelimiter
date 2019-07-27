@@ -64,6 +64,14 @@ func deleteTest(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func headerTest(res http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+
+	res.Header().Set("x-test", req.Header.Get("x-test"))
+	res.WriteHeader(200)
+	res.Write([]byte("header x-test"))
+}
+
 var started bool
 
 func Server() {
@@ -81,6 +89,7 @@ func Server() {
 	http.HandleFunc("/post", postTest)
 	http.HandleFunc("/put", putTest)
 	http.HandleFunc("/delete", deleteTest)
+	http.HandleFunc("/header", headerTest)
 
 	started = true
 
