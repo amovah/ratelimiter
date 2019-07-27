@@ -24,7 +24,7 @@ func TestRateLimiting(t *testing.T) {
 
 			res, err := client.Do(request)
 			if err != nil {
-				t.Fatal("something with proxy server went wrong!", err)
+				t.Fatal(err)
 			}
 			res.Body.Close()
 		}()
@@ -35,7 +35,7 @@ func TestRateLimiting(t *testing.T) {
 	res, err := client.Do(request)
 
 	if err != nil {
-		t.Fatal("something with proxy server went wrong!", err)
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, 429, res.StatusCode)

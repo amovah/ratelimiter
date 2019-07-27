@@ -64,7 +64,13 @@ func deleteTest(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+var started bool
+
 func Server() {
+	if started {
+		return
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8081"
@@ -75,6 +81,8 @@ func Server() {
 	http.HandleFunc("/post", postTest)
 	http.HandleFunc("/put", putTest)
 	http.HandleFunc("/delete", deleteTest)
+
+	started = true
 
 	http.ListenAndServe(":"+port, nil)
 }
