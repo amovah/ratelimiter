@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -36,13 +37,17 @@ func proxyRequest(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	mutex.Lock()
 	record[ip] = record[ip] + 1
 	totalRequest = totalRequest + 1
+	mutex.Unlock()
 
 	go func() {
 		time.Sleep(time.Second)
+		mutex.Lock()
 		record[ip] = record[ip] - 1
 		totalRequest = totalRequest - 1
+		mutex.Unlock()
 	}()
 
 	createdReq, err := http.NewRequest(req.Method, targetServer+req.URL.Path, req.Body)
@@ -68,10 +73,12 @@ var totalRequest uint64
 var maxRatePerIP uint64
 var totalMaxRate uint64
 var targetServer string
+var mutex sync.Mutex
 
 func main() {
 	record = make(map[string]uint64)
 	totalRequest = 0
+	mutex = sync.Mutex{}
 	var err error
 
 	maxRatePerIP, err = strconv.ParseUint(os.Getenv("MAX_RATE_PER_IP"), 10, 64)

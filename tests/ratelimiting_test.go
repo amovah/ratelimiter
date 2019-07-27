@@ -15,19 +15,18 @@ func TestRateLimiting(t *testing.T) {
 	config := LoadConfig()
 	client := http.Client{}
 	request, _ := http.NewRequest("GET", config.ProxyServerPath+"/get", nil)
+	maxRate := int(config.MaxRatePerIP) + 1
 
-	for i := 0; i < int(config.MaxRatePerIP)+1; i++ {
+	for i := 0; i < maxRate; i++ {
 		wg.Add(1)
-		go func() {
+		func() {
 			defer wg.Done()
 
 			res, err := client.Do(request)
-
 			if err != nil {
 				t.Fatal("something with proxy server went wrong!", err)
 			}
-
-			defer res.Body.Close()
+			res.Body.Close()
 		}()
 	}
 
