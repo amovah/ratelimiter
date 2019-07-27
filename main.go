@@ -57,6 +57,10 @@ func proxyRequest(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	for key, value := range req.Header {
+		createdReq.Header.Set(key, strings.Join(value, ", "))
+	}
+
 	client := http.Client{}
 	response, err := client.Do(createdReq)
 	if err != nil {
