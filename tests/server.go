@@ -16,7 +16,7 @@ func getTest(res http.ResponseWriter, req *http.Request) {
 func getTestFailure(res http.ResponseWriter, req *http.Request) {
 	if req.Method == "GET" {
 		res.WriteHeader(400)
-		res.Write([]byte("400 bad request"))
+		res.Write([]byte("400 very bad request"))
 	}
 }
 
