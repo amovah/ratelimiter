@@ -35,6 +35,7 @@ func proxyRequest(res http.ResponseWriter, req *http.Request) {
 	mutex.Lock()
 	if record[ip] > maxRatePerIP || totalRequest > totalMaxRate {
 		http.Error(res, "You reach your limit", 429)
+		mutex.Unlock()
 		return
 	}
 
