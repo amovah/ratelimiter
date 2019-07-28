@@ -6,4 +6,4 @@ COPY . /app
 
 RUN go build
 
-CMD ["go", "run", "ratelimiter"]
+CMD ["./ratelimiter"]
