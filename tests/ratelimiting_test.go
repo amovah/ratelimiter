@@ -2,7 +2,6 @@ package tests
 
 import (
 	"net/http"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,26 +10,18 @@ import (
 func TestRateLimiting(t *testing.T) {
 	go Server()
 
-	var wg sync.WaitGroup
 	config := LoadConfig()
 	client := http.Client{}
 	request, _ := http.NewRequest("GET", config.ProxyServerPath+"/get", nil)
 	maxRate := int(config.MaxRatePerIP) + 1
 
 	for i := 0; i < maxRate; i++ {
-		wg.Add(1)
-		func() {
-			defer wg.Done()
-
-			res, err := client.Do(request)
-			if err != nil {
-				t.Fatal(err)
-			}
-			res.Body.Close()
-		}()
+		res, err := client.Do(request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		res.Body.Close()
 	}
-
-	wg.Wait()
 
 	res, err := client.Do(request)
 
