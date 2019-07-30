@@ -22,7 +22,7 @@ func LoadConfig() Config {
 
 	proxyServerPath := os.Getenv("PROXY_SERVER_PATH")
 	if proxyServerPath == "" {
-		proxyServerPath = "http://localhost:8080"
+		proxyServerPath = "http://localhost:9020"
 	}
 
 	maxRatePerIP, err := strconv.ParseUint(os.Getenv("MAX_RATE_PER_IP"), 10, 64)
