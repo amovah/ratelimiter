@@ -37,4 +37,4 @@ go test ratelimiter/tests
 ```
 ### Stress Test
 
-I used `ab` for stress test on my gateway. first time I tried my app crashed and throw this error immediatly, _fatal error: concurrent map writes_. after searching about the error, I figured out that when my gateway receives two or more requests at same time, it tries to read and write on same memory address at same time and it cause the error. then I use `Mutex` that's a tool for doing stuff like that in golang, and then I fixed. next time, I tested my gateway for 1 day and it survived. 
+I used `ab` for stress test on my gateway. first time that I tried, my app crashed and throw this error immediatly, _fatal error: concurrent map writes_. after searching about the error, I figured out that when my gateway receives two or more requests at same time, it tries to read and write on same memory address at same time and it cause the error. then I use `Mutex` that's a tool for doing stuff like that in golang, and then I fixed. next time, I tested my gateway for 1 day and it survived. 
