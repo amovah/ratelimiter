@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratelimiter
+  labels:
+    app: ratelimiter
+spec:
+  selector:
+    matchLabels:
+      app: ratelimiter
+  replicas: 3
+  template:
+    metadata:
+      labels: 
+        app: ratelimiter
+    spec:
+      containers:
+      - name: ratelimiter-container
+        image: ratelimiter:v1
+        ports:
+        - containerPort: 9020
+        env:
+        - name: TARGET_SERVER
+          value: "http://192.168.1.105:7788"

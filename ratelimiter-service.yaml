@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratelimiter-service
+spec:
+  type: NodePort
+  ports:
+  - port: 9020
+    nodePort: 30333
+  selector:
+    app: ratelimiter
